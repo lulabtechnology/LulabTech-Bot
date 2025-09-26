@@ -36,7 +36,7 @@ export default function PhoneMock({
   }, [messages.length]);
 
   return (
-    <div className="phone relative mx-auto w/full max-w-[420px] h-[740px]">
+    <div className="phone relative mx-auto w-full max-w-[420px] h-[740px]">
       <div className="phone-notch" />
       <header className="phone-header">
         <div className="h-9 w-9 rounded-full bg-white/20 grid place-items-center">LT</div>
