@@ -1,0 +1,28 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Base UI */
+:root { --brand: 37 211 102; } /* #25D366 */
+html, body, #__next { height: 100%; }
+body { @apply bg-gray-50 text-gray-900; }
+
+/* Phone mock */
+.phone {
+  @apply bg-white rounded-[2rem] shadow-soft overflow-hidden border border-gray-200;
+}
+.phone-header {
+  @apply bg-brand-primary text-white px-4 py-3 flex items-center gap-3;
+}
+.phone-notch {
+  @apply absolute left-1/2 -translate-x-1/2 top-2 bg-black/70 h-4 w-28 rounded-xl;
+}
+.bubble-bot {
+  @apply bg-white text-gray-900 rounded-2xl px-3 py-2 shadow border border-gray-200 max-w-[80%];
+}
+.bubble-user {
+  @apply bg-[#DCF8C6] text-gray-900 rounded-2xl px-3 py-2 shadow max-w-[80%] ml-auto;
+}
+.timestamp {
+  @apply text-xs text-gray-500 mt-1;
+}
