@@ -1,11 +1,11 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
-/* Base UI */
-:root { --brand: 37 211 102; } /* #25D366 */
-html, body, #__next { height: 100%; }
-body { @apply bg-zinc-50 text-zinc-900; }
+/* Tokens de diseño (Tailwind v4 usa @theme para variables) */
+@theme {
+  --color-brand-primary: #25D366;       /* habilita bg-brand-primary */
+  --shadow-soft: 0 10px 20px rgba(0,0,0,0.08); /* habilita shadow-soft */
+  --radius-xl2: 1.25rem;                /* habilita rounded-xl2 */
+}
 
 /* Phone mock */
 .phone {
