@@ -1,38 +1,77 @@
 "use client";
 
-export default function OrderPanel() {
-  // Fase 1: totales fijos
-  const subtotal = 100;
-  const shipping = 5;
-  const total = subtotal + shipping;
+type PanelMode = "sale" | "reservation" | "idle";
+
+export default function OrderPanel({
+  mode,
+  saleTotal = { subtotal: 100, shipping: 5, total: 105 },
+  reservation = { depositSelected: null },
+  status = "Esperando acción",
+  onPayClick
+}: {
+  mode: PanelMode;
+  saleTotal?: { subtotal: number; shipping: number; total: number };
+  reservation?: { depositSelected: boolean | null };
+  status?: string;
+  onPayClick?: () => void;
+}) {
+  const fmt = (n: number) => `$${n.toFixed(2)}`;
 
   return (
     <div className="bg-white rounded-xl2 shadow-soft border border-zinc-200 p-5">
-      <h2 className="text-lg font-bold mb-4">Registro de pedido</h2>
+      <h2 className="text-lg font-bold mb-4">
+        {mode === "reservation" ? "Reserva" : "Registro de pedido"}
+      </h2>
 
-      <div className="space-y-2 text-sm">
-        <div className="flex items-center justify-between">
-          <span>Producto Lulab Tech</span>
-          <span>$100.00</span>
+      {mode === "sale" && (
+        <div className="space-y-2 text-sm">
+          <div className="flex items-center justify-between">
+            <span>Producto Lulab Tech</span>
+            <span>{fmt(saleTotal.subtotal)}</span>
+          </div>
+          <div className="flex items-center justify-between text-zinc-600">
+            <span>Envío</span>
+            <span>{fmt(saleTotal.shipping)}</span>
+          </div>
+          <hr className="my-2" />
+          <div className="flex items-center justify-between text-base font-semibold">
+            <span>Total</span>
+            <span>{fmt(saleTotal.total)}</span>
+          </div>
         </div>
-        <div className="flex items-center justify-between text-zinc-600">
-          <span>Envío</span>
-          <span>$5.00</span>
+      )}
+
+      {mode === "reservation" && (
+        <div className="space-y-2 text-sm">
+          <div className="flex items-center justify-between">
+            <span>Reserva Lulab Tech</span>
+            <span>{reservation.depositSelected ? "$10.00" : "$0.00"}</span>
+          </div>
+          <div className="text-xs text-zinc-600">
+            Depósito opcional para asegurar la reserva.
+          </div>
+          <hr className="my-2" />
+          <div className="flex items-center justify-between text-base font-semibold">
+            <span>Total</span>
+            <span>{reservation.depositSelected ? "$10.00" : "$0.00"}</span>
+          </div>
         </div>
-        <hr className="my-2" />
-        <div className="flex items-center justify-between text-base font-semibold">
-          <span>Total</span>
-          <span>${total.toFixed(2)}</span>
+      )}
+
+      {mode === "idle" && (
+        <div className="text-sm text-zinc-600">
+          Inicia en el chat: elige <b>Ventas</b> o <b>Reservas</b>.
         </div>
-      </div>
+      )}
 
       <div className="mt-4 text-xs text-zinc-500">
-        Estado: <b>Esperando confirmación</b>
+        Estado: <b>{status}</b>
       </div>
 
       <button
-        disabled
-        title="Aparece tras Confirmar (Fase 4/6)"
+        onClick={onPayClick}
+        disabled={!["sale", "reservation"].includes(mode)}
+        title="Se habilita en Fase 6 (API Yappy mock)"
         className="mt-4 w-full rounded-xl bg-brand-primary text-white py-2 font-semibold disabled:opacity-60"
       >
         Pagar con Yappy (mock)
