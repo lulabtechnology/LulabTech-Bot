@@ -1,15 +1,41 @@
 "use client";
 
-import { useMemo } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import Chip from "./Chip";
+
+type Role = "bot" | "user";
+type Message = { id: string; role: Role; text: string; chips?: string[] };
 
 function timePanama() {
   const now = new Date();
-  // Mostramos HH:mm local del navegador (Fase 8 ajustaremos al server TZ)
-  return now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+  return new Intl.DateTimeFormat("es-PA", {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+    timeZone: "America/Panama"
+  }).format(now);
 }
 
-export default function PhoneMock() {
-  const hhmm = useMemo(() => timePanama(), []);
+export type FlowState =
+  | { flow: "idle" }
+  | { flow: "sale"; step: "ask_address" | "confirm"; address?: string; confirmed?: boolean }
+  | { flow: "reservation"; step: "ask_datetime" | "deposit_choice"; datetime?: string; deposit?: boolean | null };
+
+export default function PhoneMock({
+  messages,
+  onSend,
+  onChip,
+}: {
+  messages: Message[];
+  onSend: (text: string) => void;
+  onChip: (value: string) => void;
+}) {
+  const [text, setText] = useState("");
+  const bottomRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
+  }, [messages.length]);
 
   return (
     <div className="phone relative mx-auto w-full max-w-[420px] h-[740px]">
@@ -24,38 +50,43 @@ export default function PhoneMock() {
       </header>
 
       <div className="h-[calc(100%-56px)] bg-[#ECE5DD] p-3 flex flex-col gap-3 overflow-y-auto">
-        {/* Mensajes de ejemplo estáticos (Fase 3 los haremos dinámicos) */}
-        <div className="bubble-bot">
-          ¡Hola! Soy <b>LulabBot</b> 🤖 de <b>Lulab Tech</b>. ¿Qué deseas hoy?
-          <div className="timestamp">{hhmm}</div>
-        </div>
-        <div className="flex gap-2">
-          <span className="bubble-bot">Ventas</span>
-          <span className="bubble-bot">Reservas</span>
-        </div>
+        {messages.map((m) => (
+          <div key={m.id} className={m.role === "bot" ? "bubble-bot" : "bubble-user"}>
+            <div dangerouslySetInnerHTML={{ __html: m.text.replace(/\n/g, "<br/>") }} />
+            {m.chips && m.chips.length > 0 && (
+              <div className="mt-2 flex flex-wrap gap-2">
+                {m.chips.map((c) => (
+                  <Chip key={c} onClick={() => onChip(c)}>{c}</Chip>
+                ))}
+              </div>
+            )}
+            <div className="timestamp">{timePanama()}</div>
+          </div>
+        ))}
 
-        <div className="bubble-user">
-          Ventas
-          <div className="timestamp">{hhmm}</div>
-        </div>
+        <div ref={bottomRef} />
 
-        <div className="bubble-bot">
-          Agregué <b>Producto Lulab Tech — $100</b>. Envío fijo <b>$5</b>.<br />
-          ¿Cuál es tu <b>dirección</b> para el envío?
-          <div className="timestamp">{hhmm}</div>
-        </div>
-
-        {/* Input (decorativo por ahora) */}
-        <div className="mt-auto bg-white rounded-xl2 p-2 shadow flex items-center gap-2">
+        {/* Composer */}
+        <div className="mt-auto bg-white rounded-xl2 p-2 shadow flex items-center gap-2 sticky bottom-0">
           <input
-            disabled
-            placeholder="Escribe un mensaje… (Fase 3)"
-            className="flex-1 px-3 py-2 rounded-xl border border-gray-200 outline-none disabled:bg-gray-100"
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && text.trim()) {
+                onSend(text.trim());
+                setText("");
+              }
+            }}
+            placeholder="Escribe tu respuesta…"
+            className="flex-1 px-3 py-2 rounded-xl border border-zinc-200 outline-none"
           />
           <button
-            disabled
-            className="rounded-xl bg-brand-primary text-white px-4 py-2 font-semibold disabled:opacity-60"
-            title="Disponible en Fase 3"
+            onClick={() => {
+              if (!text.trim()) return;
+              onSend(text.trim());
+              setText("");
+            }}
+            className="rounded-xl bg-brand-primary text-white px-4 py-2 font-semibold"
           >
             ➤
           </button>
