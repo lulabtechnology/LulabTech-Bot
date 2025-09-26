@@ -33,6 +33,7 @@ export default function ChatPage() {
   function handleChip(choice: string) {
     setInputError(null);
     push("user", choice);
+
     if (choice === "Ventas") {
       setUi({ mode: "sale", status: "Esperando dirección" });
       push(
@@ -41,6 +42,7 @@ export default function ChatPage() {
       );
       return;
     }
+
     if (choice === "Reservas") {
       setUi({ mode: "reservation", status: "Esperando fecha/hora", depositSelected: null });
       push(
@@ -49,11 +51,11 @@ export default function ChatPage() {
       );
       return;
     }
+
     if (choice === "Confirmar") {
       setUi((prev) =>
         prev.mode === "sale" ? { ...prev, confirmed: true, status: "Listo para pagar" } : prev
       );
-      // Payload listo para n8n (Fase 5)
       if (ui.mode === "sale" && ui.address) {
         const payload: SaleDraft = {
           kind: "sale",
@@ -65,50 +67,62 @@ export default function ChatPage() {
         };
         console.log("SALE_DRAFT → n8n (Fase 5):", payload);
       }
-      push("bot", "Perfecto ✅. Presiona <b>“Pagar con Yappy (mock)”</b> en el panel para completar tu compra.");
+      push(
+        "bot",
+        "Perfecto ✅. Presiona <b>“Pagar con Yappy (mock)”</b> en el panel para completar tu compra."
+      );
       return;
     }
+
     if (choice === "Editar") {
       setUi({ mode: "sale", status: "Esperando dirección" });
       push("bot", "Ok, dime de nuevo tu <b>dirección</b> para el envío.");
       return;
     }
+
     if (choice === "Pagar depósito $10") {
       setUi((prev) =>
-        prev.mode === "reservation" ? { ...prev, depositSelected: true, status: "Listo para pagar" } : prev
+        prev.mode === "reservation"
+          ? { ...prev, depositSelected: true, status: "Listo para pagar" }
+          : prev
       );
-      // Payload listo para n8n (Fase 5)
-    const vdt = validateDateTimePanama(ui.datetime);
-const res: ReservationDraft = {
-  kind: "reservation",
-  datetime_display: ui.datetime,
-  datetime_iso: vdt.ok ? vdt.iso : new Date().toISOString(),
-  deposit_cents: 1000
-};
-console.log("RESERVATION_DRAFT (deposit) → n8n (Fase 5):", res);
-
+      if (ui.mode === "reservation" && ui.datetime) {
+        const vdt = validateDateTimePanama(ui.datetime);
+        const res: ReservationDraft = {
+          kind: "reservation",
+          datetime_display: ui.datetime,
+          datetime_iso: vdt.ok ? vdt.iso : new Date().toISOString(),
+          deposit_cents: 1000
+        };
+        console.log("RESERVATION_DRAFT (deposit) → n8n (Fase 5):", res);
       }
-      push("bot", "Genial. Presiona <b>“Pagar con Yappy (mock)”</b> en el panel para completar el <b>depósito</b>.");
+      push(
+        "bot",
+        "Genial. Presiona <b>“Pagar con Yappy (mock)”</b> en el panel para completar el <b>depósito</b>."
+      );
       return;
     }
+
     if (choice === "Reservar sin pago") {
       setUi((prev) =>
-        prev.mode === "reservation" ? { ...prev, depositSelected: false, status: "Reserva confirmada" } : prev
+        prev.mode === "reservation"
+          ? { ...prev, depositSelected: false, status: "Reserva confirmada" }
+          : prev
       );
-   const vdt = validateDateTimePanama(ui.datetime);
-const res: ReservationDraft = {
-  kind: "reservation",
-  datetime_display: ui.datetime,
-  datetime_iso: vdt.ok ? vdt.iso : new Date().toISOString(),
-  deposit_cents: 0
-};
-console.log("RESERVATION_DRAFT (no deposit) → n8n (Fase 5):", res);
-
+      if (ui.mode === "reservation" && ui.datetime) {
+        const vdt = validateDateTimePanama(ui.datetime);
+        const res: ReservationDraft = {
+          kind: "reservation",
+          datetime_display: ui.datetime,
+          datetime_iso: vdt.ok ? vdt.iso : new Date().toISOString(),
+          deposit_cents: 0
+        };
+        console.log("RESERVATION_DRAFT (no deposit) → n8n (Fase 5):", res);
       }
       push("bot", "✅ <b>Reserva confirmada</b>. Te contactaremos para detalles.");
       return;
     }
-  }
+  } // <- cierre correcto de handleChip
 
   function handleSend(text: string) {
     setInputError(null);
@@ -121,16 +135,15 @@ console.log("RESERVATION_DRAFT (no deposit) → n8n (Fase 5):", res);
         setInputError(v.error);
         return;
       }
-      setUi({ mode: "sale", address: v.normalized, status: "Esperando confirmación", confirmed: false });
+      setUi({
+        mode: "sale",
+        address: v.normalized,
+        status: "Esperando confirmación",
+        confirmed: false
+      });
       push(
         "bot",
-        [
-          "Resumen del pedido 🧾",
-          "• Producto: $100",
-          "• Envío: $5",
-          "<b>Total: $105</b>",
-          "¿Confirmas el pedido?"
-        ].join("<br/>"),
+        ["Resumen del pedido 🧾", "• Producto: $100", "• Envío: $5", "<b>Total: $105</b>", "¿Confirmas el pedido?"].join("<br/>"),
         ["Confirmar", "Editar"]
       );
       return;
@@ -143,7 +156,12 @@ console.log("RESERVATION_DRAFT (no deposit) → n8n (Fase 5):", res);
         setInputError(v.error);
         return;
       }
-      setUi({ mode: "reservation", datetime: v.display, status: "Elegir depósito", depositSelected: null });
+      setUi({
+        mode: "reservation",
+        datetime: v.display,
+        status: "Elegir depósito",
+        depositSelected: null
+      });
       push(
         "bot",
         `Reserva para <b>${v.display}</b> creada en borrador.<br/>¿Deseas pagar <b>depósito $10</b> o <b>reservar sin pago</b>?`,
