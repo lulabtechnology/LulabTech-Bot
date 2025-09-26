@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Chip from "./Chip";
+import InlineError from "./InlineError";
 
 type Role = "bot" | "user";
 type Message = { id: string; role: Role; text: string; chips?: string[] };
@@ -16,19 +17,16 @@ function timePanama() {
   }).format(now);
 }
 
-export type FlowState =
-  | { flow: "idle" }
-  | { flow: "sale"; step: "ask_address" | "confirm"; address?: string; confirmed?: boolean }
-  | { flow: "reservation"; step: "ask_datetime" | "deposit_choice"; datetime?: string; deposit?: boolean | null };
-
 export default function PhoneMock({
   messages,
   onSend,
   onChip,
+  inputError
 }: {
   messages: Message[];
   onSend: (text: string) => void;
   onChip: (value: string) => void;
+  inputError?: string | null;
 }) {
   const [text, setText] = useState("");
   const bottomRef = useRef<HTMLDivElement>(null);
@@ -38,7 +36,7 @@ export default function PhoneMock({
   }, [messages.length]);
 
   return (
-    <div className="phone relative mx-auto w-full max-w-[420px] h-[740px]">
+    <div className="phone relative mx-auto w/full max-w-[420px] h-[740px]">
       <div className="phone-notch" />
       <header className="phone-header">
         <div className="h-9 w-9 rounded-full bg-white/20 grid place-items-center">LT</div>
@@ -67,29 +65,32 @@ export default function PhoneMock({
         <div ref={bottomRef} />
 
         {/* Composer */}
-        <div className="mt-auto bg-white rounded-xl2 p-2 shadow flex items-center gap-2 sticky bottom-0">
-          <input
-            value={text}
-            onChange={(e) => setText(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" && text.trim()) {
+        <div className="mt-auto bg-white rounded-xl2 p-2 shadow sticky bottom-0">
+          <div className="flex items-center gap-2">
+            <input
+              value={text}
+              onChange={(e) => setText(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && text.trim()) {
+                  onSend(text.trim());
+                  setText("");
+                }
+              }}
+              placeholder="Escribe tu respuesta…"
+              className="flex-1 px-3 py-2 rounded-xl border border-zinc-200 outline-none"
+            />
+            <button
+              onClick={() => {
+                if (!text.trim()) return;
                 onSend(text.trim());
                 setText("");
-              }
-            }}
-            placeholder="Escribe tu respuesta…"
-            className="flex-1 px-3 py-2 rounded-xl border border-zinc-200 outline-none"
-          />
-          <button
-            onClick={() => {
-              if (!text.trim()) return;
-              onSend(text.trim());
-              setText("");
-            }}
-            className="rounded-xl bg-brand-primary text-white px-4 py-2 font-semibold"
-          >
-            ➤
-          </button>
+              }}
+              className="rounded-xl bg-brand-primary text-white px-4 py-2 font-semibold"
+            >
+              ➤
+            </button>
+          </div>
+          <InlineError>{inputError}</InlineError>
         </div>
       </div>
     </div>
