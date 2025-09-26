@@ -4,7 +4,7 @@ export default function Home() {
   return (
     <main className="mx-auto max-w-3xl px-6 py-20 text-center">
       <h1 className="text-3xl font-bold mb-3">Lulab Tech — WhatsApp Bot + Yappy (mock)</h1>
-      <p className="text-gray-600 mb-8">
+      <p className="text-zinc-600 mb-8">
         Flujo: Chat tipo WhatsApp → Pedido → Pago Yappy (mock) → Recibo.
       </p>
       <Link
