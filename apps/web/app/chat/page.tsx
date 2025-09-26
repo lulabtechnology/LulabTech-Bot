@@ -78,16 +78,15 @@ export default function ChatPage() {
         prev.mode === "reservation" ? { ...prev, depositSelected: true, status: "Listo para pagar" } : prev
       );
       // Payload listo para n8n (Fase 5)
-      if (ui.mode === "reservation" && ui.datetime) {
-        const res: ReservationDraft = {
-          kind: "reservation",
-          datetime_display: ui.datetime,
-          datetime_iso: validateDateTimePanama(ui.datetime).ok
-            ? validateDateTimePanama(ui.datetime).iso!
-            : new Date().toISOString(),
-          deposit_cents: 1000
-        };
-        console.log("RESERVATION_DRAFT (deposit) → n8n (Fase 5):", res);
+    const vdt = validateDateTimePanama(ui.datetime);
+const res: ReservationDraft = {
+  kind: "reservation",
+  datetime_display: ui.datetime,
+  datetime_iso: vdt.ok ? vdt.iso : new Date().toISOString(),
+  deposit_cents: 1000
+};
+console.log("RESERVATION_DRAFT (deposit) → n8n (Fase 5):", res);
+
       }
       push("bot", "Genial. Presiona <b>“Pagar con Yappy (mock)”</b> en el panel para completar el <b>depósito</b>.");
       return;
@@ -96,16 +95,15 @@ export default function ChatPage() {
       setUi((prev) =>
         prev.mode === "reservation" ? { ...prev, depositSelected: false, status: "Reserva confirmada" } : prev
       );
-      if (ui.mode === "reservation" && ui.datetime) {
-        const res: ReservationDraft = {
-          kind: "reservation",
-          datetime_display: ui.datetime,
-          datetime_iso: validateDateTimePanama(ui.datetime).ok
-            ? validateDateTimePanama(ui.datetime).iso!
-            : new Date().toISOString(),
-          deposit_cents: 0
-        };
-        console.log("RESERVATION_DRAFT (no deposit) → n8n (Fase 5):", res);
+   const vdt = validateDateTimePanama(ui.datetime);
+const res: ReservationDraft = {
+  kind: "reservation",
+  datetime_display: ui.datetime,
+  datetime_iso: vdt.ok ? vdt.iso : new Date().toISOString(),
+  deposit_cents: 0
+};
+console.log("RESERVATION_DRAFT (no deposit) → n8n (Fase 5):", res);
+
       }
       push("bot", "✅ <b>Reserva confirmada</b>. Te contactaremos para detalles.");
       return;
