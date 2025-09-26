@@ -5,13 +5,15 @@ type PanelMode = "sale" | "reservation" | "idle";
 export default function OrderPanel({
   mode,
   saleTotal = { subtotal: 100, shipping: 5, total: 105 },
-  reservation = { depositSelected: null },
+  saleAddress,
+  reservation = { depositSelected: null, datetimeDisplay: undefined },
   status = "Esperando acción",
   onPayClick
 }: {
   mode: PanelMode;
   saleTotal?: { subtotal: number; shipping: number; total: number };
-  reservation?: { depositSelected: boolean | null };
+  saleAddress?: string;
+  reservation?: { depositSelected: boolean | null; datetimeDisplay?: string };
   status?: string;
   onPayClick?: () => void;
 }) {
@@ -24,21 +26,28 @@ export default function OrderPanel({
       </h2>
 
       {mode === "sale" && (
-        <div className="space-y-2 text-sm">
-          <div className="flex items-center justify-between">
-            <span>Producto Lulab Tech</span>
-            <span>{fmt(saleTotal.subtotal)}</span>
+        <>
+          <div className="space-y-2 text-sm">
+            <div className="flex items-center justify-between">
+              <span>Producto Lulab Tech</span>
+              <span>{fmt(saleTotal.subtotal)}</span>
+            </div>
+            <div className="flex items-center justify-between text-zinc-600">
+              <span>Envío</span>
+              <span>{fmt(saleTotal.shipping)}</span>
+            </div>
+            <hr className="my-2" />
+            <div className="flex items-center justify-between text-base font-semibold">
+              <span>Total</span>
+              <span>{fmt(saleTotal.total)}</span>
+            </div>
           </div>
-          <div className="flex items-center justify-between text-zinc-600">
-            <span>Envío</span>
-            <span>{fmt(saleTotal.shipping)}</span>
-          </div>
-          <hr className="my-2" />
-          <div className="flex items-center justify-between text-base font-semibold">
-            <span>Total</span>
-            <span>{fmt(saleTotal.total)}</span>
-          </div>
-        </div>
+          {saleAddress && (
+            <div className="mt-3 text-xs text-zinc-600">
+              <b>Envío a:</b> {saleAddress}
+            </div>
+          )}
+        </>
       )}
 
       {mode === "reservation" && (
@@ -47,6 +56,11 @@ export default function OrderPanel({
             <span>Reserva Lulab Tech</span>
             <span>{reservation.depositSelected ? "$10.00" : "$0.00"}</span>
           </div>
+          {reservation.datetimeDisplay && (
+            <div className="text-xs text-zinc-600">
+              <b>Fecha/Hora:</b> {reservation.datetimeDisplay} (America/Panama)
+            </div>
+          )}
           <div className="text-xs text-zinc-600">
             Depósito opcional para asegurar la reserva.
           </div>
