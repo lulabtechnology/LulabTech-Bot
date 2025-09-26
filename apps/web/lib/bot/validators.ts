@@ -1,12 +1,18 @@
-// Zona: America/Panama (UTC-5 todo el año)
-const TZ_OFFSET_MIN = -5 * 60;
+// Tipos explícitos (discriminated unions)
+export type AddressValidation =
+  | { ok: true; normalized: string }
+  | { ok: false; error: string };
 
-export function validateAddress(input: string) {
+export type DateTimeValidation =
+  | { ok: true; display: string; iso: string }
+  | { ok: false; error: string };
+
+// Zona: America/Panama (UTC-5 todo el año)
+export function validateAddress(input: string): AddressValidation {
   const raw = (input || "").trim().replace(/\s+/g, " ");
   if (raw.length < 8) {
     return { ok: false, error: "Dirección muy corta. Dame más detalles (mín. 8 caracteres)." };
   }
-  // Evita direcciones solo de símbolos
   if (!/[a-zA-Z]/.test(raw)) {
     return { ok: false, error: "Incluye letras en la dirección (calle, sector, etc.)." };
   }
@@ -14,12 +20,11 @@ export function validateAddress(input: string) {
 }
 
 // Acepta: "YYYY-MM-DD HH:mm"
-export function validateDateTimePanama(input: string) {
+export function validateDateTimePanama(input: string): DateTimeValidation {
   const s = (input || "").trim();
   const m = s.match(/^(\d{4})-(\d{2})-(\d{2})\s+(\d{2}):(\d{2})$/);
-  if (!m) {
-    return { ok: false, error: "Formato inválido. Usa: 2025-10-10 15:00" };
-  }
+  if (!m) return { ok: false, error: "Formato inválido. Usa: 2025-10-10 15:00" };
+
   const [_, ys, ms, ds, hs, mins] = m;
   const y = Number(ys), mo = Number(ms), d = Number(ds), h = Number(hs), mi = Number(mins);
   if (mo < 1 || mo > 12) return { ok: false, error: "Mes inválido (01–12)." };
@@ -27,10 +32,8 @@ export function validateDateTimePanama(input: string) {
   if (h < 0 || h > 23) return { ok: false, error: "Hora inválida (00–23)." };
   if (mi < 0 || mi > 59) return { ok: false, error: "Minutos inválidos (00–59)." };
 
-  // Construir fecha “como si” fuera en UTC-5
-  // Creamos una fecha UTC y luego añadimos offset -05:00
+  // Construir fecha “como si” fuera en UTC-5 (America/Panama)
   const dateUTC = new Date(Date.UTC(y, mo - 1, d, h + 5, mi)); // compensamos -05:00
-  // Chequeo rápido: no permitir pasado (tolerancia 2 minutos)
   const now = new Date();
   if (dateUTC.getTime() < now.getTime() - 2 * 60 * 1000) {
     return { ok: false, error: "La fecha/hora ya pasó. Elige un momento futuro." };
